@@ -2,7 +2,12 @@ import 'dart:convert';
 import 'package:flutter_vless/flutter_vless.dart';
 
 class VpnService {
-  static final FlutterVless _core = FlutterVless();
+  static final FlutterVless _core = FlutterVless(
+    onStatusChanged: (status) {
+      // Tu peux logger ou mettre à jour l’UI ici si besoin
+      // print('Status: ${status.connectionState}');
+    },
+  );
 
   static Future<void> initialize() async {
     await _core.initializeVless(
@@ -14,13 +19,14 @@ class VpnService {
   /// Démarre le VPN avec un lien vmess:// ou vless://
   /// [customHost] permet de forcer le Host / SNI
   static Future<bool> start(String shareLink, {String? customHost}) async {
-    final parsed = FlutterVless.parse(shareLink);
-    final protocol = parsed.protocol.toLowerCase();
+    final link = shareLink.trim().toLowerCase();
 
-    if (protocol != 'vmess' && protocol != 'vless') {
+    // On vérifie uniquement VMess et VLESS
+    if (!link.startsWith('vmess://') && !link.startsWith('vless://')) {
       throw Exception('Seuls les protocoles VMess et VLESS sont supportés');
     }
 
+    final parsed = FlutterVless.parse(shareLink);
     String config = parsed.getFullConfiguration();
 
     if (customHost != null && customHost.trim().isNotEmpty) {
