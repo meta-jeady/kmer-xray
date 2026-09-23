@@ -16,12 +16,18 @@ class V2RayConfig {
       final link = input.trim();
       if (link.isEmpty) return null;
 
-      final parsed = FlutterVless.parse(link);
-      final protocol = parsed.protocol.toLowerCase();
+      final lower = link.toLowerCase();
+      String? protocol;
 
-      if (protocol != 'vmess' && protocol != 'vless') {
-        return null;
+      if (lower.startsWith('vmess://')) {
+        protocol = 'vmess';
+      } else if (lower.startsWith('vless://')) {
+        protocol = 'vless';
+      } else {
+        return null; // On refuse tout le reste
       }
+
+      final parsed = FlutterVless.parse(link);
 
       return V2RayConfig(
         rawLink: link,
